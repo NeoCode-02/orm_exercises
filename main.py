@@ -1,11 +1,13 @@
-from sqlalchemy import create_engine, String, Integer
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, String, Integer, ForeignKey
+from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
+from dotenv import load_dotenv
+import os
 
-DATABASE_URL = "postgresql://postgres:0211@localhost:5432/classroom_db"
-
+load_dotenv(dotenv_path=".env")
+DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL, echo=True)
 
 SessionLocal = sessionmaker(
@@ -35,6 +37,8 @@ class Professor(Base):
     second_name: Mapped[str] = mapped_column(String(25), nullable=False)
     teaching_subjects: Mapped[str] = mapped_column(String(50))
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    
+    courses: Mapped[List["Course"]] = relationship(back_populates="professor")
 
     def __repr__(self):
         return f"Professor(id={self.id}, first_name={self.first_name}, second_name={self.second_name})"
@@ -43,8 +47,13 @@ class Course(Base):
     __tablename__ = "course"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50))
+    professor_id: Mapped[Optional[int]] = mapped_column(ForeignKey('professor.id'))
     professor_name: Mapped[str] = mapped_column(String(50))  
-
+    category_id: Mapped[Optional[int]] = mapped_column(ForeignKey('category.id'))
+    
+    professor: Mapped[Optional[Professor]] = relationship(back_populates="courses")
+    # category: Mapped[Optional[Category]] = relationship(back_populates="courses")
+    
     def __repr__(self):
         return f"Course(id={self.id}, name={self.name})"
 
@@ -53,7 +62,8 @@ class Category(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     category_name: Mapped[str] = mapped_column(String(25))
     price: Mapped[int] = mapped_column(Integer)
-
+ 
+    courses: Mapped[List["Course"]] = relationship(back_populates="category")
     def __repr__(self):
         return f"Category(id={self.id}, category_name={self.category_name}, price={self.price})"
     
@@ -215,3 +225,6 @@ if __name__ == "__main__":
     # View final data
     print("\nFinal data after deletions:")
     view_all_data()
+
+
+
