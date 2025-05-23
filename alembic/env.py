@@ -4,7 +4,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from main import Base, Student, Professor, Course, Category, DATABASE_URL
+from main import Base, StudentCourse, Student, Professor, Course, Category, DATABASE_URL
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
